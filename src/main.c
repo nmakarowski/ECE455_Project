@@ -534,7 +534,7 @@ static void ADCSetup( void ){
 	ADC_config.ADC_ScanConvMode = DISABLE; //Perform in single channel
 
 	ADC_Init(ADC1, &ADC_config);
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 1, ADC_SampleTime_144Cycles);
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_13, 1, ADC_SampleTime_144Cycles);
 	ADC_Cmd(ADC1, ENABLE);
 }
 
