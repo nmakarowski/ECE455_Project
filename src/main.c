@@ -185,6 +185,13 @@ xQueueHandle xQueue_handle = 0;
 
 
 /*-----------------------------------------------------------*/
+void wait() {
+	int i = 1;
+	while (i < 10000000){
+		i++;
+	}
+}
+
 
 int main(void)
 {
@@ -199,48 +206,20 @@ int main(void)
 	/* Configure the system ready to run the demo.  The clock configuration
 	can be done here if it was not done before main() was called. */
 
-	printf("WE ARE SETUP!!!!\n");
 	prvSetupHardware();
 
 	GPIOSetup();
 	ADCSetup();
 
-	printf("WE ARE HERE!!!!\n");
-
-	printf("WE ARE there!!!!\n");
-	ADC_SoftwareStartConv(ADC1);
-
-	while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0){
-		printf("got 0 - restarting conversion and continuing :)\n");
-	}
-	printf("ADC VALUE!!! (%d).\n", ADC_GetConversionValue(ADC1));
-	ADC_SoftwareStartConv(ADC1);
-
-	while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0){
-		printf("got 0 - restarting conversion and continuing :|\n");
-		int i = 1;
-		while (i < 10000000){
-			i++;
-		}
+	while (1){
 		ADC_SoftwareStartConv(ADC1);
+		while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0){
+			printf("got 0 - restarting conversion and continuing :)\n");
+		}
+		printf("ADC VALUE!!! (%d).\n", ADC_GetConversionValue(ADC1));
+		ADC_SoftwareStartConv(ADC1);
+		wait();
 	}
-	printf("ADC VALUE!!! (%d).\n", ADC_GetConversionValue(ADC1));
-	ADC_SoftwareStartConv(ADC1);
-
-	while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0){
-		printf("got 0 - restarting conversion and continuing :(\n");
-	}
-	printf("ADC VALUE!!! (%d).\n", ADC_GetConversionValue(ADC1));
-	ADC_SoftwareStartConv(ADC1);
-
-//	while (1){
-//		while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0){
-//			ADC_SoftwareStartConv(ADC1);
-//			printf("got 0 - restarting conversion and continuing :(\n");
-//	//			continue;
-//		}
-//		printf("ADC VALUE!!! (%d).\n", ADC_GetConversionValue(ADC1));
-//	}
 
 
 	/* Create the queue used by the queue send and queue receive tasks.
@@ -472,13 +451,13 @@ static void prvSetupHardware( void )
 	main() was called. */
 }
 
-int turnOnLight(uint16_t GPIO_Pin) {
+int turnOnLight(uint16_t pin) {
 	//TODO: lock with a mutex that locks access to the lights
 
 	//Set all bits to 0 -- turn off all lights
 	GPIO_ResetBits(GPIOC, GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2);
 
-	GPIO_SetBits(GPIOC, GPIO_PIN);
+	GPIO_SetBits(GPIOC, pin);
 
 	//TODO: Unlock the mutex
 }
@@ -537,6 +516,14 @@ static void ADCSetup( void ){
 	ADC_init.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_Init(GPIOC, &ADC_init);
 
+	//initializes adc common config
+	ADC_CommonInitTypeDef ADC_common_config;
+	ADC_common_config.ADC_Mode = ADC_Mode_Independent;
+	ADC_common_config.ADC_Prescaler = ADC_Prescaler_Div2;
+	ADC_common_config.ADC_DMAAccessMode = ADC_DMAAccessMode_Disabled;
+	ADC_common_config.ADC_TwoSamplingDelay = ADC_TwoSamplingDelay_5Cycles;
+	ADC_CommonInit(&ADC_common_config);
+
 	ADC_InitTypeDef ADC_config;
 	ADC_config.ADC_ContinuousConvMode = ENABLE;
 	ADC_config.ADC_DataAlign= ADC_DataAlign_Right;
@@ -545,12 +532,10 @@ static void ADCSetup( void ){
 	ADC_config.ADC_NbrOfConversion = 1;
 	ADC_config.ADC_Resolution= ADC_Resolution_12b;
 	ADC_config.ADC_ScanConvMode = DISABLE; //Perform in single channel
+
 	ADC_Init(ADC1, &ADC_config);
-
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 1, ADC_SampleTime_144Cycles);
 	ADC_Cmd(ADC1, ENABLE);
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 0x01, ADC_SampleTime_144Cycles);
-
-
 }
 
 
