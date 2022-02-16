@@ -6,6 +6,7 @@
 
 
 void logErrors (int condition, char* errorStr);
+static int getPotentiometerValue();
 static double getTimeToNextCar_seconds();
 static double calculateTimeFromPercentage(int percentage);
 
@@ -14,16 +15,20 @@ static double calculateTimeFromPercentage(int percentage);
  */
 static double getTimeToNextCar_seconds() {
   // get the potentiometer value
-  ADC_SoftwareStartConv(ADC1);
-  while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0){
-    printf("got 0 - restarting conversion and continuing :)\n");
-  }
-  int potentiometerVal = ADC_GetConversionValue(ADC1);
 
+  int  potentiometerVal = ADC_GetConversionValue(ADC1);
   logErrors(potentiometerVal >= 0, "negative potentiometer value");
   logErrors(potentiometerVal <= POT_MAX_VALUE, "potentiometer value above 4000");
   int percentage = potentiometerVal / POT_TO_PERCENTAGE;
   return calculateTimeFromPercentage(percentage);
+}
+
+static int getPotentiometerValue() {
+  ADC_SoftwareStartConv(ADC1);
+  while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0){
+    printf("got 0 - restarting conversion and continuing :)\n");
+  }
+  return potentiometerVal = ADC_GetConversionValue(ADC1);
 }
 
 /*
