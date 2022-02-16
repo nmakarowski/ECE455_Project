@@ -19,11 +19,10 @@ static double getTimeToNextCar_seconds() {
     printf("got 0 - restarting conversion and continuing :)\n");
   }
   int potentiometerVal = ADC_GetConversionValue(ADC1);
+
   logErrors(potentiometerVal >= 0, "negative potentiometer value");
   logErrors(potentiometerVal <= POT_MAX_VALUE, "potentiometer value above 4000");
   int percentage = potentiometerVal / POT_TO_PERCENTAGE;
-
-
   return calculateTimeFromPercentage(percentage);
 }
 
